@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>erensearch.com | v2.0</title>
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{background:#06090f;color:#dce4f0;font-family:sans-serif;min-height:100vh}
+        .c{max-width:800px;margin:0 auto;padding:40px 20px}
+        .header{text-align:center;margin-bottom:30px}
+        .logo{font-size:40px;font-weight:900;background:linear-gradient(135deg,#60a5fa,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .motto{color:#fff; font-size:18px; margin-top:10px}
+        
+        .card{background:rgba(255,255,255,0.05);border-radius:24px;padding:30px;border:1px solid rgba(255,255,255,0.1)}
+        
+        /* Arama Kutusu ve Buton Alt Alta */
+        .sr-box{display:flex; flex-direction:column; gap:15px}
+        input{padding:18px; border-radius:15px; border:1px solid #333; background:#000; color:#fff; font-size:18px; outline:none}
+        .btn{padding:18px; border-radius:15px; border:none; background:#3b82f6; color:#fff; font-weight:bold; font-size:18px; cursor:pointer}
+        .btn:hover{background:#2563eb}
+
+        /* Dil Seçimi ve Mavi Yazı */
+        .toggle-btn{background:none; border:none; color:#60a5fa; cursor:pointer; margin-top:20px; text-decoration:underline}
+        .lang-grid{display:none; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:10px; margin-top:15px}
+        .lang-opt{padding:10px; background:rgba(255,255,255,0.05); border-radius:10px; text-align:center; cursor:pointer; border:1px solid transparent}
+        .lang-opt.active{border-color:#3b82f6; background:rgba(59,130,246,0.1)}
+        
+        /* İstediğin Mavi Bilgilendirme Yazısı */
+        .hint{color:#3b82f6; font-size:13px; margin-top:20px; text-align:center; font-weight:500; line-height:1.5}
+
+        .results{margin-top:30px}
+        .res-item{background:rgba(255,255,255,0.03); padding:15px; border-radius:15px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border:1px solid rgba(255,255,255,0.05)}
+        .go-btn{background:#3b82f6; color:#fff; text-decoration:none; padding:8px 15px; border-radius:8px; font-weight:bold; font-size:14px}
+    </style>
+</head>
+<body>
+
+<div class="c">
+    <div class="header">
+        <div class="logo">erensearch.com</div>
+        <p class="motto">Öğrenmek istediğiniz bilgiyi bütün evrende arayın.</p>
+    </div>
+
+    <div class="card">
+        <div class="sr-box">
+            <input type="text" id="q" placeholder="Bir şeyler yazın..." onkeydown="if(event.key==='Enter')search()">
+            <button class="btn" onclick="search()">EVRENDE ARA</button>
+        </div>
+
+        <button class="toggle-btn" onclick="toggleL()">⚙️ Dil Tercihlerini Düzenle</button>
+        <div id="lGrid" class="lang-grid"></div>
+
+        <p class="hint">Küresel sonuçları yerel dilinizde okumak için tarayıcınızın otomatik çeviri özelliğini kullanmayı unutmayın.</p>
+    </div>
+
+    <div id="results" class="results"></div>
+</div>
+
+<script>
+    const langs = [
+        {c:"tr", n:"Türkçe", f:"🇹🇷"}, {c:"en", n:"İngilizce", f:"🇬🇧"},
+        {c:"de", n:"Almanca", f:"🇩🇪"}, {c:"fr", n:"Fransızca", f:"🇫🇷"},
+        {c:"ja", n:"Japonca", f:"🇯🇵"}, {c:"ru", n:"Rusça", f:"🇷🇺"}
+    ];
+    let selected = ["tr", "en", "de", "fr", "ja", "ru"];
+
+    function drawLangs() {
+        const grid = document.getElementById("lGrid");
+        grid.innerHTML = langs.map(l => `
+            <div class="lang-opt ${selected.includes(l.c) ? 'active' : ''}" onclick="selL('${l.c}')">
+                ${l.f} ${l.n} ${selected.includes(l.c) ? '✓' : ''}
+            </div>
+        `).join("");
+    }
+
+    window.selL = (c) => {
+        if(c === "tr") return;
+        selected = selected.includes(c) ? selected.filter(x => x!==c) : [...selected, c];
+        drawLangs();
+    }
+
+    window.toggleL = () => {
+        const g = document.getElementById("lGrid");
+        g.style.display = g.style.display === "grid" ? "none" : "grid";
+    }
+
+    window.search = async () => {
+        const val = document.getElementById("q").value.trim();
+        if(!val) return;
+        
+        const resDiv = document.getElementById("results");
+        resDiv.innerHTML = "<p style='text-align:center'>🚀 Taranıyor...</p>";
+
+        let html = "";
+        for(let c of selected) {
+            let translated = val;
+            if(c !== "tr") {
+                try {
+                    const r = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${c}&dt=t&q=${encodeURIComponent(val)}`);
+                    const d = await r.json();
+                    translated = d[0][0][0];
+                } catch(e) { translated = val; }
+            }
+            const gUrl = `https://www.google.com/search?q=${encodeURIComponent(translated)}&hl=tr&sl=auto&tl=tr`;
+            const lName = langs.find(x => x.c === c).n;
+            const lFlag = langs.find(x => x.c === c).f;
+
+            html += `
+                <div class="res-item">
+                    <div>
+                        <small style="color:#666">${lFlag} ${lName}</small>
+                        <div style="font-size:18px; font-weight:bold; color:#34d399">${translated}</div>
+                    </div>
+                    <a href="${gUrl}" target="_blank" class="go-btn">Gör →</a>
+                </div>
+            `;
+        }
+        resDiv.innerHTML = html;
+    }
+
+    drawLangs();
+</script>
+</body>
+</html>
