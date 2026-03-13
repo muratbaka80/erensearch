@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>erensearch.com</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#080c14;color:#dce4f0;font-family:system-ui,sans-serif;min-height:100vh}
+.c{max-width:900px;margin:0 auto;padding:40px 20px}
+.header{text-align:center;margin-bottom:36px}
+.logo{font-size:28px;font-weight:800;background:linear-gradient(135deg,#4d94ff,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sub{color:#6b7fa3;font-size:14px;margin-top:6px}
+.card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:20px;margin-bottom:14px}
+.sr{display:flex;gap:10px;margin-bottom:14px}
+input{flex:1;padding:14px 18px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.3);color:#dce4f0;font-size:16px;outline:none}
+input:focus{border-color:#4d94ff}
+input::placeholder{color:#4a5f7f}
+.btn{padding:14px 28px;border-radius:12px;border:none;background:linear-gradient(135deg,#3b7ddd,#4d94ff);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.btn:disabled{opacity:0.4}
+.lb{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.lt{padding:6px 14px;border-radius:20px;border:1px dashed rgba(255,255,255,0.18);background:transparent;color:#6b7fa3;font-size:13px;cursor:pointer}
+.tag{padding:4px 10px;border-radius:14px;background:rgba(77,148,255,0.12);border:1px solid rgba(77,148,255,0.18);font-size:12px;color:#8bb8f0}
+.pg{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-top:14px}
+.lo{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.07);background:transparent;color:#6b7fa3;font-size:13px;cursor:pointer;width:100%;text-align:left}
+.lo.a{border-color:rgba(77,148,255,0.4);background:rgba(77,148,255,0.12);color:#93c5fd;font-weight:600}
+.ph{display:flex;justify-content:space-between;align-items:center}
+.bs{padding:4px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:transparent;font-size:12px;cursor:pointer}
+.err{padding:12px 16px;border-radius:12px;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.18);color:#fca5a5;font-size:14px;margin-bottom:14px}
+.rh{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.oa{padding:8px 18px;border-radius:10px;border:none;background:linear-gradient(135deg,#059669,#34d399);color:#fff;font-size:13px;font-weight:700;cursor:pointer}
+.rl{display:flex;flex-direction:column;gap:10px}
+.rc{display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);text-decoration:none;color:#dce4f0;transition:all .2s}
+.rc:hover{background:rgba(77,148,255,0.1);transform:translateX(4px)}
+.ri{flex:1}
+.rn{font-size:11px;color:#6b7fa3;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.rv{font-size:16px;font-weight:500;color:#c8d6e8;margin-top:2px}
+.rb{padding:6px 14px;border-radius:8px;background:rgba(77,148,255,0.12);border:1px solid rgba(77,148,255,0.18);color:#4d94ff;font-size:12px;font-weight:700;white-space:nowrap}
+.ft{text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.07);color:#4a5f7f;font-size:12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:600px){.sr{flex-direction:column}.btn{width:100%}.rc{flex-wrap:wrap}.rb{width:100%;text-align:center}.rh{flex-direction:column;gap:10px}}
+</style>
+</head>
+<body>
+<div class="c">
+<div class="header"><div style="font-size:32px">🌐</div><div class="logo">erensearch.com</div><p class="sub">Bir sorgu yaz, <span id="lc">3</span> dilde ara</p></div>
+<div class="card">
+<div class="sr"><input id="q" placeholder="Aranacak kelime veya cümle..." onkeydown="if(event.key==='Enter')go()"><button class="btn" onclick="go()">🔍 Ara</button></div>
+<div class="lb" id="lb"></div>
+</div>
+<div class="card" id="pp" style="display:none"><div class="ph"><span style="color:#6b7fa3;font-size:14px">Dil seçin:</span><div style="display:flex;gap:8px"><button class="bs" style="color:#4d94ff" onclick="sa()">Tümü</button><button class="bs" style="color:#f87171" onclick="ca()">Temizle</button></div></div><div class="pg" id="pg"></div></div>
+<div class="err" id="err" style="display:none"></div>
+<div id="ra" style="display:none"><div class="rh"><h2 style="font-size:16px;color:#8bb8f0">Sonuçlar — <span id="rq" style="color:#6b7fa3;font-weight:400"></span></h2><button class="oa" onclick="oall()">🚀 Tümünü Aç</button></div><div class="rl" id="rl"></div></div>
+<div class="ft">erensearch.com &copy; 2026</div>
+</div>
+<script>
+var L=[{c:"en",n:"İngilizce",f:"🇬🇧",g:"en"},{c:"de",n:"Almanca",f:"🇩🇪",g:"de"},{c:"fr",n:"Fransızca",f:"🇫🇷",g:"fr"},{c:"es",n:"İspanyolca",f:"🇪🇸",g:"es"},{c:"it",n:"İtalyanca",f:"🇮🇹",g:"it"},{c:"pt",n:"Portekizce",f:"🇧🇷",g:"pt"},{c:"ru",n:"Rusça",f:"🇷🇺",g:"ru"},{c:"ja",n:"Japonca",f:"🇯🇵",g:"ja"},{c:"zh",n:"Çince",f:"🇨🇳",g:"zh-CN"},{c:"ko",n:"Korece",f:"🇰🇷",g:"ko"},{c:"ar",n:"Arapça",f:"🇸🇦",g:"ar"},{c:"hi",n:"Hintçe",f:"🇮🇳",g:"hi"},{c:"nl",n:"Felemenkçe",f:"🇳🇱",g:"nl"},{c:"sv",n:"İsveççe",f:"🇸🇪",g:"sv"},{c:"pl",n:"Lehçe",f:"🇵🇱",g:"pl"},{c:"tr",n:"Türkçe",f:"🇹🇷",g:"tr"}];
+var sel=["en","de","fr"],po=false;
+function init(){rg();ub()}
+function rg(){document.getElementById("pg").innerHTML=L.map(function(l){return'<button class="lo'+(sel.indexOf(l.c)>-1?' a':'')+'" onclick="tl(\''+l.c+'\')"><span style="font-size:18px">'+l.f+'</span><span>'+l.n+'</span></button>'}).join("")}
+function tl(c){var i=sel.indexOf(c);if(i>-1)sel.splice(i,1);else if(sel.length<16)sel.push(c);rg();ub()}
+function sa(){sel=L.map(function(l){return l.c});rg();ub()}
+function ca(){sel=[];rg();ub()}
+function ub(){var b=document.getElementById("lb");var h='<button class="lt" onclick="tp()">'+(po?'▲ Gizle':'⚙️ Dil Seç ('+sel.length+'/16)')+'</button>';sel.forEach(function(c){var l=L.find(function(x){return x.c===c});h+='<span class="tag">'+l.f+' '+l.n+'</span>'});b.innerHTML=h;document.getElementById("lc").textContent=sel.length}
+function tp(){po=!po;document.getElementById("pp").style.display=po?"block":"none";ub()}
+function go(){
+    var q=document.getElementById("q").value.trim();
+    if(!q){alert("Lütfen bir kelime girin.");return}
+    if(sel.length===0){alert("En az bir dil seçin.");return}
+    
+    document.getElementById("rq").textContent='"'+q+'"';
+    var h="";
+    var results = sel.map(function(c){
+        var l=L.find(function(x){return x.c===c});
+        // Doğrudan Google Çeviri linki oluşturuyoruz (Vercel API'ye ihtiyaç duymaz)
+        var searchUrl = "https://www.google.com/search?q=" + encodeURIComponent(q) + "&hl=" + l.g;
+        return {name: l.n, flag: l.f, url: searchUrl};
+    });
+
+    results.forEach(function(r){
+        h+='<a href="'+r.url+'" target="_blank" class="rc"><span style="font-size:28px">'+r.flag+'</span><div class="ri"><div class="rn">'+r.name+'</div><div class="rv">'+q+' için arama yap</div></div><span class="rb">Google\'da Gör →</span></a>';
+    });
+    
+    document.getElementById("rl").innerHTML=h;
+    document.getElementById("ra").style.display="block";
+}
+function oall(){
+    var q=document.getElementById("q").value.trim();
+    sel.forEach(function(c,i){
+        var l=L.find(function(x){return x.c===c});
+        var url = "https://www.google.com/search?q=" + encodeURIComponent(q) + "&hl=" + l.g;
+        setTimeout(function(){window.open(url,"_blank")},i*400);
+    });
+}
+init();
+</script>
+</body>
+</html>
