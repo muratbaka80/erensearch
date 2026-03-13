@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>erensearch.com - Canlı Sonuçlar</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#080c14;color:#dce4f0;font-family:system-ui,sans-serif;min-height:100vh}
+.c{max-width:1100px;margin:0 auto;padding:20px}
+.header{text-align:center;margin-bottom:20px}
+.logo{font-size:24px;font-weight:800;background:linear-gradient(135deg,#4d94ff,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:15px;margin-bottom:15px}
+.sr{display:flex;gap:10px;margin-bottom:10px}
+input{flex:1;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.3);color:#fff;outline:none}
+.btn{padding:12px 24px;border-radius:10px;border:none;background:#3b7ddd;color:#fff;font-weight:700;cursor:pointer}
+.lb{display:flex;gap:5px;flex-wrap:wrap;font-size:12px}
+.tag{padding:3px 8px;border-radius:10px;background:rgba(77,148,255,0.1);border:1px solid rgba(77,148,255,0.2);color:#8bb8f0}
+/* Arama Kutuları */
+.result-box{margin-top:20px; border-radius:15px; overflow:hidden; background:#fff; margin-bottom:30px; border:2px solid #4d94ff}
+.result-header{background:#1e293b; color:#fff; padding:10px 15px; display:flex; justify-content:space-between; align-items:center}
+iframe{width:100%; height:500px; border:none; background:#fff}
+.loading{text-align:center; padding:20px; color:#6b7fa3}
+</style>
+</head>
+<body>
+<div class="c">
+    <div class="header"><div class="logo">erensearch.com</div></div>
+    <div class="card">
+        <div class="sr"><input id="q" placeholder="Bir kelime yazın..." onkeydown="if(event.key==='Enter')go()"><button class="btn" onclick="go()">🔍 Dünyada Ara</button></div>
+        <div class="lb" id="lb"></div>
+    </div>
+    
+    <div id="results-container"></div>
+</div>
+
+<script>
+var L=[{c:"en",n:"İngilizce",f:"🇬🇧"},{c:"de",n:"Almanca",f:"🇩🇪"},{c:"fr",n:"Fransızca",f:"🇫🇷"},{c:"es",n:"İspanyolca",f:"🇪🇸"},{c:"ru",n:"Rusça",f:"🇷🇺"},{c:"ja",n:"Japonca",f:"🇯🇵"}];
+var sel=["en","de","fr"];
+
+function init(){
+    document.getElementById("lb").innerHTML = sel.map(c => {
+        let l = L.find(x=>x.c===c);
+        return `<span class="tag">${l.f} ${l.n}</span>`;
+    }).join("");
+}
+
+async function translateText(text, targetLang) {
+    try {
+        const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`);
+        const data = await res.json();
+        return data[0][0][0];
+    } catch (e) { return text; }
+}
+
+async function go() {
+    var q = document.getElementById("q").value.trim();
+    if(!q) return;
+    
+    var container = document.getElementById("results-container");
+    container.innerHTML = "<div class='loading'>🤖 Diller çevriliyor ve sonuçlar yükleniyor...</div>";
+
+    let html = "";
+    for(let code of sel) {
+        let lang = L.find(x => x.c === code);
+        let translated = await translateText(q, code);
+        
+        // Google Arama URL'si
+        let searchUrl = `https://www.google.com/search?q=${encodeURIComponent(translated)}&igu=1`;
+
+        html += `
+        <div class="result-box">
+            <div class="result-header">
+                <span>${lang.f} ${lang.n}: <b>${translated}</b></span>
+                <a href="${searchUrl}" target="_blank" style="color:#4d94ff; font-size:12px; text-decoration:none;">Tam Ekran Aç ↗</a>
+            </div>
+            <iframe src="${searchUrl}"></iframe>
+        </div>`;
+    }
+    container.innerHTML = html;
+}
+
+init();
+</script>
+</body>
+</html>
